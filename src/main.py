@@ -4,14 +4,20 @@ from embedder import embed_dataframe, tokenize_text, embed_text
 from qdrant_client_utils import init_qdrant_client, recreate_collection, insert_data, search
 from openai_utils import clarify_question, choose_best_match
 from config import QDRANT_TOP_K
+from abbreviation_replacer import AbbreviationReplacer
 
 # Load dữ liệu
 df = pd.read_excel("data/BỘ 250 CÂU HỎI CỦA SINH VIÊN VỀ TRƯỜNG ĐẠI HỌC CÔNG THƯƠNG TP.HCM.xlsx", header=1)
 df = df.iloc[:, :3].drop(columns=["STT"])
 df["STT"] = range(1, len(df) + 1)
 
+#Replace Abbre
+replacer = AbbreviationReplacer()
+
 # Embedding
 df = embed_dataframe(df)
+df['Câu hỏi'] = df['Câu hỏi'].str.lower()
+df['Câu hỏi'] = df['Câu hỏi'].apply(replacer.replace)
 
 # Qdrant
 client = init_qdrant_client()
@@ -24,7 +30,7 @@ query_text = input("Nhập câu hỏi: ")
 clarified = clarify_question(query_text)
 print(f"\n🧠 Câu hỏi sau khi làm rõ: {clarified}")
 
-query_vector = embed_text(tokenize_text(clarified))
+query_vector = embed_text(tokenize_text(replacer.replace(clarified.lower().strip())))
 results = search(client, query_vector, QDRANT_TOP_K)
 
 retrieved = [(res.id, res.payload["question"]) for res in results]

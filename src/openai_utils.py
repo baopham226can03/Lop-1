@@ -4,15 +4,20 @@ from config import OPENAI_API_KEY, OPENAI_MODEL_NAME
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 def clarify_question(query_text):
-    prompt = f"""Bạn là một chuyên gia về ngôn ngữ tiếng Việt. Đang ở ngữ cảnh là hỏi đáp các vấn đề của trường Đại học Công Thương TPHCM. 
-Hãy chuyển đổi câu hỏi sau thành một câu hỏi rõ ràng, đầy đủ ngữ pháp, thể hiện đầy đủ mục đích của người hỏi.
-Nếu câu hỏi quá ngắn hoặc mơ hồ như “học phí?”, “ngành?”, “ngập học?” thì hãy viết lại thành các câu như “Học phí của trường là bao nhiêu?”, “Trường có những ngành đào tạo nào?”, “Thủ tục nhập học như thế nào?”.
-Khi câu hỏi không được rõ ràng, lang mang, không có mục đích thì cũng viết lại trình bày lại cho đẹp.
-Ngoài ra câu hỏi cũng phải ở dạng đơn giản nhất có thể, đừng đi quá cụ thể nêu
-Chỉ trả về duy nhất câu hỏi đã được chuyển đổi, không thêm bất kỳ nhận xét hay giải thích nào.
+    prompt = f"""Bạn là một trợ lý AI chuyên xử lý ngôn ngữ tự nhiên. Nhiệm vụ của bạn là chuẩn hóa câu hỏi tiếng Việt từ dạng tự nhiên, không chính thức hoặc lặp từ thành dạng câu hỏi rõ ràng, ngắn gọn, đúng ngữ pháp và giữ nguyên ý nghĩa gốc. Hãy thực hiện các bước sau:
 
+1. Loại bỏ các từ thừa như "dạ", "ạ", "cho em hỏi", "mình", "vậy", "với" khi không cần thiết.
+2. Sửa lỗi chính tả, viết hoa đầu câu và các danh từ riêng (nếu có).
+3. Chuyển câu thành dạng chuẩn, mạch lạc, không lặp ý.
+4. Giữ nguyên nội dung và ý nghĩa của câu hỏi.
 
-Câu hỏi gốc: "{query_text}"
+Dưới đây là ví dụ:  
+- Câu gốc: "Dạ cho e hỏi HUIT và DCT là 1 đúng không"  
+- Câu chuẩn hóa: "HUIT và DCT là một đúng không?"
+
+Bây giờ, hãy chuẩn hóa câu hỏi sau:  
+
+"{query_text}"
 """
     response = client.chat.completions.create(
         model=OPENAI_MODEL_NAME,
@@ -32,7 +37,7 @@ Câu truy vấn gốc: '{clarified_question}'
 Danh sách câu hỏi:\n{question_list_text}
 
 Chỉ trả về duy nhất số nguyên là STT tương ứng của câu hỏi phù hợp nhất, không thêm bất kỳ ký tự hoặc từ nào khác như 'STT', dấu chấm hay giải thích.
-Nếu trong 5 câu hoàn toàn không có câu nào giống, trả về 'x' nhé, tuyển chọn gắt gao chỉ chọn khi ý nghĩa thật sự giống, không khoan nhượng nhé
+Nếu trong 5 câu hoàn toàn không có câu nào giống, trả về 'x' nhé
 """
     response = client.chat.completions.create(
         model=OPENAI_MODEL_NAME,
